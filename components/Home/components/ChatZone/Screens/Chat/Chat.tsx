@@ -60,27 +60,28 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
 
   const getRandomQuote = useCallback(() => {
     const quotes = [
-      "Let's get started...",
-      'A good day to start learning.',
-      "Let's start learning.",
-      "Let's build something.",
-      'Try experimenting.',
-      'Try something new.',
-      'Try something different.',
-      'Make something unique.',
-      'Try something creative.',
-      'Make something innovative.',
-      'Create something original.',
-      'Create something fresh.',
-      'Try something novel.',
-      'Try something unusual.',
-      'Try something unconventional.',
-      'Life is a learning process.',
-      'Life is short, learn something new.',
-      'Learning is a treasure that will follow its owner everywhere.',
-      'Learning is not attained by chance, it must be sought for with ardor and diligence.',
-      'Learning is not a spectator sport.',
+      "Proceed, pal...",
+      "Perfect period to partake in pedagogy.",
+      "Pursue proficiency.",
+      "Piece together projects.",
+      "Ponder possibilities.",
+      "Plunge into the peculiar.",
+      "Pick a pioneering path.",
+      "Produce a peculiar piece.",
+      "Pursue a pioneering perspective.",
+      "Procure a progressive product.",
+      "Pen something pristine.",
+      "Present a pristine perspective.",
+      "Probe into the peculiar.",
+      "Poke at the paradoxical.",
+      "Pursue the perplexing.",
+      "Perpetual process of personal progress.",
+      "Precious period, pick up proficiency.",
+      "Perpetual pedagogy pays off perpetually.",
+      "Passion and perseverance produce proficiency.",
+      "Participation, not passive perusal, promotes proficiency."
     ];
+    
 
     return quotes[Math.floor(Math.random() * quotes.length)];
   }, []);
@@ -204,7 +205,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         {models.length === 0 ? (
           <div className="mx-auto flex h-full w-[300px] flex-col justify-center space-y-6 sm:w-[600px]">
             <div className="text-center text-4xl font-bold text-black dark:text-white">
-              Welcome to unSAGED
+              Welcome to poiesisPete
             </div>
           </div>
         ) : modelError ? (
@@ -239,7 +240,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                           dark:from-fuchsia-500 dark:via-violet-600 dark:to-indigo-400
                           bg-clip-text bg-175% animate-bg-pan-fast rotate-0"
                         >
-                          <div className="text-5xl font-semibold">unSAGED</div>
+                          <div className="text-5xl font-semibold">poiesisPete</div>
                         </div>
                       </div>
                     </div>
