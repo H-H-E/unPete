@@ -90,3 +90,14 @@ export const TWITTER_CLIENT_ID =
 
 export const TWITTER_CLIENT_SECRET =
   dockerEnvVarFix(process.env.TWITTER_CLIENT_SECRET) || '';
+
+export const AZURE_AD_CLIENT_ID = 
+  dockerEnvVarFix(process.env.AZURE_AD_CLIENT_ID) || '';
+export const AZURE_AD_TENANT_ID = 
+  dockerEnvVarFix(process.env.AZURE_AD_TENANT_ID) || '';
+
+export const AZURE_AD_CLIENT_SECRET = 
+  dockerEnvVarFix(process.env.AZURE_AD_CLIENT_SECRET) || '';
+  
+
+

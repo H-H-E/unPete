@@ -1,6 +1,9 @@
 import {
   APPLE_CLIENT_ID,
   APPLE_CLIENT_SECRET,
+  AZURE_AD_CLIENT_ID,
+  AZURE_AD_CLIENT_SECRET,
+  AZURE_AD_TENANT_ID,
   AUTH0_CLIENT_ID,
   AUTH0_CLIENT_SECRET,
   AUTH0_ISSUER,
@@ -148,6 +151,21 @@ export async function getProviders() {
         clientSecret: OKTA_CLIENT_SECRET!,
         authorization: authorization,
         allowDangerousEmailAccountLinking: true,
+      }),
+    );
+  }
+  if (AZURE_AD_CLIENT_ID) {
+    const provider = await import('next-auth/providers/azure-ad');
+    const AzureProvider = provider.default;
+    providers.push(
+      AzureProvider({
+        clientId: AZURE_AD_CLIENT_ID!,
+        clientSecret: AZURE_AD_CLIENT_SECRET!,
+        tenantId: process.env.AZURE_AD_TENANT_ID!,
+        authorization: authorization,
+        allowDangerousEmailAccountLinking: true,
+
+
       }),
     );
   }
