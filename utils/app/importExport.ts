@@ -4,7 +4,7 @@ import { Database } from '@/types/database';
 import {
   LatestExportFormat,
   SupportedExportFormats,
-  UnsagedExportFormatV1,
+  poiesisPeteExportFormatV1,
 } from '@/types/export';
 import { FolderInterface } from '@/types/folder';
 import { Prompt } from '@/types/prompt';
@@ -27,7 +27,7 @@ import { storageGetPrompts, storageUpdatePrompts } from './storage/prompts';
 import { saveSelectedConversation } from './storage/selectedConversation';
 import { deleteSelectedConversation } from './storage/selectedConversation';
 
-export function isExportFormatV1(obj: any): obj is UnsagedExportFormatV1 {
+export function isExportFormatV1(obj: any): obj is poiesisPeteExportFormatV1 {
   return Array.isArray(obj);
 }
 
@@ -38,9 +38,9 @@ export function cleanData(data: any): LatestExportFormat {
     return data;
   }
   {
-    // Attempt to convert to unSAGED format
+    // Attempt to convert to poiesisPete format
     return {
-      app: 'unSAGED',
+      app: 'poiesisPete',
       version: 1,
       conversations: cleanConversationHistory(data.history),
       folders: cleanFolders(data.folders),
@@ -64,7 +64,7 @@ export const exportData = async (database: Database, user: User) => {
   let prompts = await storageGetPrompts(database, user);
 
   const data = {
-    app: 'unSAGED',
+    app: 'poiesisPete',
     version: 1,
     conversations: history || [],
     folders: folders || [],
@@ -77,7 +77,7 @@ export const exportData = async (database: Database, user: User) => {
   });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
-  link.download = `unsaged_history_${currentDate()}.json`;
+  link.download = `poiesisPete_history_${currentDate()}.json`;
   link.href = url;
   link.style.display = 'none';
   document.body.appendChild(link);
@@ -160,7 +160,7 @@ export const importData = async (
   storageUpdatePrompts(database, user, newMessageTemplates);
 
   return {
-    app: 'unSAGED',
+    app: 'poiesisPete',
     version: 1,
     conversations: newConversations,
     folders: newFolders,
