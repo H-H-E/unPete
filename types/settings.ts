@@ -54,6 +54,11 @@ export const SystemSettings: SettingsSection[] = [
             value: 'dark',
             default: true,
           },
+          {
+            name: 'Granite',
+            value: 'g',
+            default: true,
+          },
         ],
         storage: 'local',
       },

@@ -14,7 +14,7 @@ import { Prompt } from '@/types/prompt';
 
 import { PromptFolders } from './components/Folders';
 import { PromptList } from './components/PromptList';
-import { PrimaryButton } from '@/components/Common/Buttons/PrimaryButton';
+import { PrimaryButtonAlt } from '@/components/Common/Buttons/PrimaryButton';
 import { SecondaryButton } from '@/components/Common/Buttons/SecondaryButton';
 import Search from '@/components/Common/Search';
 import HomeContext from '@/components/Home/home.context';
@@ -139,14 +139,14 @@ const Prompts = () => {
       }}
     >
       <div className="flex items-center gap-x-2">
-        <PrimaryButton
+        <PrimaryButtonAlt
           onClick={() => {
             handleCreatePrompt();
             doSearch('');
           }}
         >
           {t('New message template')}
-        </PrimaryButton>
+        </PrimaryButtonAlt>
 
         <SecondaryButton onClick={createFolder}>
           <IconFolderPlus size={16} />

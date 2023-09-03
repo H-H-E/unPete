@@ -107,8 +107,8 @@ export const SystemPromptSelect = () => {
       className="
       w-full rounded-sm
       bg-transparent text-white
-      bg-gradient-to-r from-fuchsia-600 via-violet-900 to-indigo-500
-      dark:from-fuchsia-500 dark:via-violet-600 dark:to-indigo-400
+      bg-gradient-to-r from-black-600 via-violet-900 to-indigo-500
+      dark:from-black-500 dark:via-violet-600 dark:to-indigo-400
       bg-175% animate-bg-pan-slow appearance-none dark:bg-gray-700 hover:opacity-90
       "
     >

@@ -27,7 +27,7 @@ import { LatestExportFormat, SupportedExportFormats } from '@/types/export';
 import { ConversationList } from './components/ConversationList';
 import { ConversationsSettings } from './components/ConversationsSettings';
 import { ConversationsFolders } from './components/Folders';
-import { PrimaryButton } from '@/components/Common/Buttons/PrimaryButton';
+import { PrimaryButtonAlt } from '@/components/Common/Buttons/PrimaryButton';
 import { SecondaryButton } from '@/components/Common/Buttons/SecondaryButton';
 import Search from '@/components/Common/Search';
 import HomeContext from '@/components/Home/home.context';
@@ -193,14 +193,14 @@ export const Conversations = () => {
       }}
     >
       <div className="flex items-center gap-x-2">
-        <PrimaryButton
+        <PrimaryButtonAlt
           onClick={() => {
             handleNewConversation();
             doSearch('');
           }}
         >
           {t('New conversation')}
-        </PrimaryButton>
+        </PrimaryButtonAlt>
 
         <SecondaryButton onClick={createFolder}>
           <IconFolderPlus size={16} />

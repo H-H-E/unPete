@@ -15,7 +15,7 @@ import { SystemPrompt } from '@/types/system-prompt';
 
 import { SystemPromptFolders } from './components/Folders';
 import { SystemPromptList } from './components/SystemPromptList';
-import { PrimaryButton } from '@/components/Common/Buttons/PrimaryButton';
+import { PrimaryButtonAlt } from '@/components/Common/Buttons/PrimaryButton';
 import { SecondaryButton } from '@/components/Common/Buttons/SecondaryButton';
 import Search from '@/components/Common/Search';
 import HomeContext from '@/components/Home/home.context';
@@ -203,14 +203,14 @@ const SystemPrompts = () => {
       }}
     >
       <div className="flex items-center gap-x-2">
-        <PrimaryButton
+        <PrimaryButtonAlt
           onClick={() => {
             handleCreateSystemPrompt();
             doSearch('');
           }}
         >
           {t('New system prompt')}
-        </PrimaryButton>
+        </PrimaryButtonAlt>
         <SecondaryButton onClick={createFolder}>
           <IconFolderPlus size={16} />
         </SecondaryButton>

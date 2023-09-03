@@ -24,7 +24,7 @@ export const ModelSelect = () => {
     <div
       className="
       w-full rounded-sm 
-      bg-transparent text-white
+      bg-transparent text-black
       bg-gradient-to-r from-black-600 via-violet-900 to-indigo-500
       dark:from-black-500 dark:via-violet-600 dark:to-indigo-400
       bg-175% animate-bg-pan-slow appearance-none dark:bg-gray-700 hover:opacity-90
@@ -39,7 +39,7 @@ export const ModelSelect = () => {
           <option
             key={model.id}
             value={model.id}
-            className="bg-theme-primary-menu-light dark:bg-theme-primary-menu-dark text-black dark:text-white"
+            className="bg-theme-primary-menu-light dark:bg-theme-primary-menu-dark text-black dark:black"
           >
             {model.id}
           </option>

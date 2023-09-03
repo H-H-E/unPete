@@ -11,7 +11,7 @@ import { useTranslation } from 'next-i18next';
 
 import { SystemPrompt } from '@/types/system-prompt';
 
-import { PrimaryButton } from '@/components/Common/Buttons/PrimaryButton';
+import { PrimaryButtonAlt } from '@/components/Common/Buttons/PrimaryButton';
 import { PrimaryLabel } from '@/components/Common/Labels/PrimaryLabel';
 
 import SystemPromptsContext from '../SystemPrompts.context';
@@ -137,14 +137,14 @@ export const SystemPromptEditModal: FC<Props> = ({ systemPrompt, onClose }) => {
             />
 
             <div className="flex space-x-4 mt-4">
-              <PrimaryButton
+              <PrimaryButtonAlt
                 onClick={() => {
                   onClose();
                 }}
               >
                 {t('Cancel')}
-              </PrimaryButton>
-              <PrimaryButton
+              </PrimaryButtonAlt>
+              <PrimaryButtonAlt
                 onClick={() => {
                   const updatedPrompt: SystemPrompt = {
                     id: systemPrompt.id,
@@ -158,7 +158,7 @@ export const SystemPromptEditModal: FC<Props> = ({ systemPrompt, onClose }) => {
                 }}
               >
                 {t('Save')}
-              </PrimaryButton>
+              </PrimaryButtonAlt>
             </div>
           </div>
         </div>

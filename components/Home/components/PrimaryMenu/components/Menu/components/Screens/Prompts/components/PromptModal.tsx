@@ -4,7 +4,7 @@ import { useTranslation } from 'next-i18next';
 
 import { Prompt } from '@/types/prompt';
 
-import { PrimaryButton } from '@/components/Common/Buttons/PrimaryButton';
+import { PrimaryButtonAlt } from '@/components/Common/Buttons/PrimaryButton';
 
 interface Props {
   prompt: Prompt;
@@ -107,7 +107,7 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
               rows={10}
             />
 
-            <PrimaryButton
+            <PrimaryButtonAlt
               onClick={() => {
                 const updatedPrompt = {
                   ...prompt,
@@ -121,7 +121,7 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
               }}
             >
               {t('Save')}
-            </PrimaryButton>
+            </PrimaryButtonAlt>
           </div>
         </div>
       </div>

@@ -225,22 +225,21 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                   <div className="animate-zoom-pulse-slow">
                     <div className="flex flex-row self-center items-center align-middle justify-center">
                       <div
-                        className="h-[64px] z-10 flex flex-row self-center items-start align-middle justify-center
-                          w-fit bg-[#e7eaf5] dark:bg-[#1b1f23] rounded-2xl px-2 py-1 shadow-xl"
+                        className=" z-10 flex flex-row self-center items-start align-middle justify-center
+                          w-fit bg-[#e7eaf5] rounded-2xl px-2 py-1 shadow-xl"
                       >
                         <Image
                           src="./icon-64.svg"
                           height={64}
-                          width={64}
+                          width={264}
                           alt="logo"
                         />
                         <div
                           className="flex flex-row self-center items-end align-middle justify-center text-transparent 
-                          bg-gradient-to-r from-fuchsia-700 via-violet-900 to-indigo-500
-                          dark:from-fuchsia-500 dark:via-violet-600 dark:to-indigo-400
+                          bg-gradient-to-r from-black-700 via-violet-900 to-indigo-500
+                          dark:from-black-500 dark:via-violet-600 dark:to-indigo-400
                           bg-clip-text bg-175% animate-bg-pan-fast rotate-0"
                         >
-                          <div className="text-5xl font-semibold">poiesisPete</div>
                         </div>
                       </div>
                     </div>
