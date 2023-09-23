@@ -42,3 +42,25 @@ export const getUser = async () => {
 
   return user;
 };
+
+// helpers/msGraph.ts
+
+const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const fetchImportantDates = async (customAccessToken: any ) => {
+  const endpoint = "https://graph.microsoft.com/v1.0/me/events";
+  
+  const response = await fetch(endpoint, {
+    headers: {
+      Authorization: `Bearer ${customAccessToken}`,
+      'Content-Type': 'application/json'
+    }
+  });
+
+  if (response.ok) {
+    const data = await response.json();
+    return data.value; // The events are in the 'value' property.
+  } else {
+    throw new Error('Failed to fetch events from Microsoft Calendar');
+  }
+}
+
