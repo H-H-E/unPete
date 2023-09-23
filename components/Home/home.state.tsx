@@ -38,6 +38,8 @@ export interface HomeInitialState {
   settings: SettingsSection[];
   fetchComplete: boolean;
   settingsLoaded: boolean;
+  currentDate: Date;
+
 }
 
 export const initialState: HomeInitialState = {
@@ -68,4 +70,5 @@ export const initialState: HomeInitialState = {
   settings: [],
   fetchComplete: false,
   settingsLoaded: false,
+  currentDate: new Date(),
 };

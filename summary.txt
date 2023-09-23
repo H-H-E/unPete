@@ -1,0 +1,173 @@
+components/Home/components/PrimaryMenu/components/Menu/components/Screens/Calendar
+├── Calendar.context.tsx
+├── Calendar.state.tsx
+├── Calendar.tsx
+└── components
+    ├── CalendarSettings.tsx
+    ├── ClearEvents.tsx
+    ├── Dates.tsx
+    ├── EventComponent.tsx
+    ├── EventList.tsx
+    └── TODO.md
+
+2 directories, 9 files
+
+import {CalendarEvent}  from "@/types/calendar";
+
+export interface CalendarState {
+    events: CalendarEvent[];
+    selectedEvent?: CalendarEvent;
+  }
+  
+  export const initialState: CalendarState = {
+    events: [],
+  };
+  import { Dispatch, createContext } from 'react';
+
+export interface CalendarEvent {
+  id: string;
+  title: string;
+  description: string;
+  date: Date;
+  rsvp?: boolean;
+}
+
+export interface CalendarContextProps {
+  events: CalendarEvent[];
+  selectedEvent?: CalendarEvent;
+  handleAddEvent: (event: CalendarEvent) => void;
+  handleDeleteEvent: (eventId: string) => void;
+  handleUpdateEvent: (eventId: string, updatedEvent: CalendarEvent) => void;
+}
+
+
+const CalendarContext = createContext<CalendarContextProps | undefined>(undefined);
+
+
+
+export default CalendarContext;
+import { useContext } from 'react';
+import CalendarContext from './Calendar.context';
+import { CalendarEvent } from './Calendar.context'; 
+
+export const Calendar = () => {
+  const context = useContext(CalendarContext);
+
+  if (!context) {
+    throw new Error('Calendar must be used within a CalendarProvider');
+  }
+
+  const {
+    events,
+    selectedEvent,
+    handleAddEvent,
+    handleDeleteEvent,
+    handleUpdateEvent,
+  } = context;
+  
+  // Mock function for now
+  const displayEventDetails = (event: CalendarEvent) => {
+    console.log(event);
+  };
+
+  return (
+    <div>
+      <h2>Calendar</h2>
+      <ul>
+        {events.map((event) => (
+          <li key={event.id} onClick={() => displayEventDetails(event)}>
+            {event.title}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+import { FC, useContext } from 'react';
+import CalendarContext from '../Calendar.context';
+import { CalendarEvent } from '../Calendar.context'; 
+
+const ClearEvents: FC = () => {
+    const context = useContext(CalendarContext);
+
+    if (!context) {
+        throw new Error("ClearEvents must be used within a CalendarProvider");
+    }
+    
+    const { events } = context;
+    
+
+  // Placeholder for now
+  const clearAllEvents = () => {
+    console.log("All events cleared");
+  };
+
+  return (
+    <>
+      {events.length > 0 && (
+        <button onClick={clearAllEvents}>Clear All Events</button>
+      )}
+    </>
+  );
+};
+
+export default ClearEvents;
+import { FC } from 'react';
+import EventComponent from './EventComponent';
+import { CalendarEvent } from '../Calendar.context'; 
+
+interface Props {
+  events: CalendarEvent[];
+}
+
+const EventList: FC<Props> = ({ events }) => {
+  return (
+    <div>
+      {events.map(event => (
+        <EventComponent key={event.id} event={event} />
+      ))}
+    </div>
+  );
+};
+
+export default EventList;
+import { FC, useContext } from 'react';
+import { CalendarEvent } from '../Calendar.context'; 
+import CalendarContext from '../Calendar.context';
+
+interface Props {
+  event: CalendarEvent;
+}
+
+
+const EventComponent: FC<Props> = ({ event }) => {
+  const context = useContext(CalendarContext);
+
+  if (!context) {
+    throw new Error('EventComponent must be used within a CalendarProvider');
+  }
+
+  const { handleDeleteEvent } = context;
+
+  return (
+    <div>
+      <h3>{event.title}</h3>
+      <p>{event.description}</p>
+      <button onClick={() => handleDeleteEvent(event.id)}>Delete</button>
+    </div>
+  );
+};
+
+export default EventComponent;
+// Placeholder for now
+const CalendarSettings = () => {
+    return (
+      <div>
+        <h3>Calendar Settings</h3>
+        {/* Add any settings related UI here */}
+      </div>
+    );
+  };
+  
+  export default CalendarSettings;
+  

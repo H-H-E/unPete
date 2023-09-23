@@ -1,0 +1,664 @@
+/Users/hhe/Desktop/P/unSaged/unSAGED/components/Home/components/PrimaryMenu/components/Menu/components/Screens/Conversations
+├── Conversations.context.tsx
+├── Conversations.state.tsx
+├── Conversations.tsx
+└── components
+    ├── ClearConversations.tsx
+    ├── ConversationComponent.tsx
+    ├── ConversationList.tsx
+    ├── ConversationsSettings.tsx
+    └── Folders.tsx
+
+2 directories, 8 files
+===== /Users/hhe/Desktop/P/unSaged/unSAGED/components/Home/components/PrimaryMenu/components/Menu/components/Screens/Conversations/Conversations.context.tsx =====
+import { Dispatch, createContext } from 'react';
+
+import { ActionType } from '@/hooks/useCreateReducer';
+
+import { Conversation } from '@/types/chat';
+import { Database } from '@/types/database';
+import { SupportedExportFormats } from '@/types/export';
+
+import { ConversationsInitialState } from './Conversations.state';
+
+export interface ConversationsContextProps {
+  state: ConversationsInitialState;
+  dispatch: Dispatch<ActionType<ConversationsInitialState>>;
+  handleDeleteConversation: (conversation: Conversation) => void;
+  handleClearConversations: () => void;
+  handleExportData: (database: Database) => void;
+  handleImportConversations: (data: SupportedExportFormats) => void;
+}
+
+const ConversationsContext = createContext<ConversationsContextProps>(
+  undefined!,
+);
+
+export default ConversationsContext;
+===== /Users/hhe/Desktop/P/unSaged/unSAGED/components/Home/components/PrimaryMenu/components/Menu/components/Screens/Conversations/Conversations.tsx =====
+import { IconFolderPlus, IconMistOff, IconPlus } from '@tabler/icons-react';
+import { useCallback, useContext, useEffect } from 'react';
+
+import { useTranslation } from 'next-i18next';
+
+import { useCreateReducer } from '@/hooks/useCreateReducer';
+
+import { DEFAULT_TEMPERATURE } from '@/utils/app/const';
+import { exportData, importData } from '@/utils/app/importExport';
+import { storageDeleteConversation } from '@/utils/app/storage/conversation';
+import { storageDeleteConversations } from '@/utils/app/storage/conversations';
+import {
+  storageDeleteFolders,
+  storageUpdateFolders,
+} from '@/utils/app/storage/folders';
+import { localSaveAPIKey } from '@/utils/app/storage/local/apiKey';
+import { localSaveShowPrimaryMenu } from '@/utils/app/storage/local/uiState';
+import {
+  deleteSelectedConversation,
+  saveSelectedConversation,
+} from '@/utils/app/storage/selectedConversation';
+
+import { Conversation } from '@/types/chat';
+import { Database } from '@/types/database';
+import { LatestExportFormat, SupportedExportFormats } from '@/types/export';
+
+import { ConversationList } from './components/ConversationList';
+import { ConversationsSettings } from './components/ConversationsSettings';
+import { ConversationsFolders } from './components/Folders';
+import { PrimaryButtonAlt } from '@/components/Common/Buttons/PrimaryButton';
+import { SecondaryButton } from '@/components/Common/Buttons/SecondaryButton';
+import Search from '@/components/Common/Search';
+import HomeContext from '@/components/Home/home.context';
+
+import ConversationsContext from './Conversations.context';
+import { ConversationsInitialState, initialState } from './Conversations.state';
+
+import { v4 as uuidv4 } from 'uuid';
+
+export const Conversations = () => {
+  const { t } = useTranslation('conversations');
+
+  const conversationsContextValue = useCreateReducer<ConversationsInitialState>(
+    {
+      initialState,
+    },
+  );
+
+  const {
+    state: {
+      conversations,
+      showPrimaryMenu,
+      defaultModelId,
+      database,
+      folders,
+      user,
+    },
+    dispatch: homeDispatch,
+    handleCreateFolder,
+    handleNewConversation,
+    handleUpdateConversation,
+  } = useContext(HomeContext);
+
+  const {
+    state: { searchTerm, filteredConversations },
+    dispatch: chatDispatch,
+  } = conversationsContextValue;
+
+  const handleExportData = (database: Database) => {
+    exportData(database, user!);
+  };
+
+  const handleImportConversations = async (data: SupportedExportFormats) => {
+    if (!database || !user) return;
+    const {
+      conversations,
+      folders,
+      system_prompts,
+      message_templates,
+    }: LatestExportFormat = await importData(database, user, data);
+    homeDispatch({ field: 'conversations', value: conversations });
+    homeDispatch({
+      field: 'selectedConversation',
+      value: conversations[conversations.length - 1],
+    });
+    homeDispatch({ field: 'folders', value: folders });
+    homeDispatch({ field: 'prompts', value: message_templates });
+    homeDispatch({ field: 'systemPrompts', value: system_prompts });
+  };
+
+  const handleClearConversations = async () => {
+    if (!database || !user) return;
+    homeDispatch({ field: 'conversations', value: [] });
+
+    const deletedFolders = folders.filter((f) => f.type === 'chat');
+
+    let deletedFolderIds: string[] = [];
+    for (const folder of deletedFolders) {
+      deletedFolderIds.push(folder.id);
+    }
+
+    await storageDeleteConversations(database, user);
+    storageDeleteFolders(database, user, deletedFolderIds);
+    deleteSelectedConversation(user);
+
+    const updatedFolders = folders.filter((f) => f.type !== 'chat');
+
+    homeDispatch({ field: 'folders', value: updatedFolders });
+    storageUpdateFolders(database, user, updatedFolders);
+  };
+
+  const handleDeleteConversation = (conversation: Conversation) => {
+    if (!database || !user) return;
+    const updatedConversations = storageDeleteConversation(
+      database,
+      user,
+      conversation.id,
+      conversations,
+    );
+
+    homeDispatch({ field: 'conversations', value: updatedConversations });
+    chatDispatch({ field: 'searchTerm', value: '' });
+
+    if (updatedConversations.length > 0) {
+      homeDispatch({
+        field: 'selectedConversation',
+        value: updatedConversations[updatedConversations.length - 1],
+      });
+
+      saveSelectedConversation(
+        user,
+        updatedConversations[updatedConversations.length - 1],
+      );
+    } else {
+      deleteSelectedConversation(user);
+    }
+  };
+
+  const handleDrop = (e: any) => {
+    if (e.dataTransfer) {
+      const conversation = JSON.parse(e.dataTransfer.getData('conversation'));
+      handleUpdateConversation(conversation, { key: 'folderId', value: null });
+      chatDispatch({ field: 'searchTerm', value: '' });
+      e.target.style.background = 'none';
+    }
+  };
+
+  useEffect(() => {
+    if (searchTerm) {
+      chatDispatch({
+        field: 'filteredConversations',
+        value: conversations.filter((conversation) => {
+          const searchable =
+            conversation.name.toLocaleLowerCase() +
+            ' ' +
+            conversation.messages.map((message) => message.content).join(' ');
+          return searchable.toLowerCase().includes(searchTerm.toLowerCase());
+        }),
+      });
+    } else {
+      chatDispatch({
+        field: 'filteredConversations',
+        value: conversations,
+      });
+    }
+  }, [searchTerm, conversations, chatDispatch]);
+
+  const doSearch = (term: string) =>
+    chatDispatch({ field: 'searchTerm', value: term });
+
+  const createFolder = () => handleCreateFolder(t('New folder'), 'chat');
+
+  const allowDrop = (e: any) => {
+    e.preventDefault();
+  };
+
+  const highlightDrop = (e: any) => {
+    e.target.style.background = '#343541';
+  };
+
+  const removeHighlight = (e: any) => {
+    e.target.style.background = 'none';
+  };
+
+  return (
+    <ConversationsContext.Provider
+      value={{
+        ...conversationsContextValue,
+        handleDeleteConversation,
+        handleClearConversations,
+        handleImportConversations,
+        handleExportData,
+      }}
+    >
+      <div className="flex items-center gap-x-2">
+        <PrimaryButtonAlt
+          onClick={() => {
+            handleNewConversation();
+            doSearch('');
+          }}
+        >
+          {t('New conversation')}
+        </PrimaryButtonAlt>
+
+        <SecondaryButton onClick={createFolder}>
+          <IconFolderPlus size={16} />
+        </SecondaryButton>
+      </div>
+      <Search
+        placeholder={t('Search...') || ''}
+        searchTerm={searchTerm}
+        onSearch={doSearch}
+      />
+
+      <div className="flex-grow overflow-auto">
+        {filteredConversations?.length > 0 && (
+          <div
+            className="flex border-b pb-2
+          border-theme-button-border-light dark:border-theme-button-border-dark"
+          >
+            <ConversationsFolders searchTerm={searchTerm} />
+          </div>
+        )}
+
+        {filteredConversations?.length > 0 ? (
+          <div
+            className="pt-2"
+            onDrop={handleDrop}
+            onDragOver={allowDrop}
+            onDragEnter={highlightDrop}
+            onDragLeave={removeHighlight}
+          >
+            <ConversationList conversations={filteredConversations} />
+          </div>
+        ) : (
+          <div className="mt-8 select-none text-center text-black dark:text-white opacity-50">
+            <IconMistOff className="mx-auto mb-3" />
+            <span className="text-[14px] leading-normal">{t('No data.')}</span>
+          </div>
+        )}
+      </div>
+      <ConversationsSettings />
+    </ConversationsContext.Provider>
+  );
+};
+===== /Users/hhe/Desktop/P/unSaged/unSAGED/components/Home/components/PrimaryMenu/components/Menu/components/Screens/Conversations/Conversations.state.tsx =====
+import { Conversation } from '@/types/chat';
+
+export interface ConversationsInitialState {
+  searchTerm: string;
+  filteredConversations: Conversation[];
+}
+
+export const initialState: ConversationsInitialState = {
+  searchTerm: '',
+  filteredConversations: [],
+};
+===== /Users/hhe/Desktop/P/unSaged/unSAGED/components/Home/components/PrimaryMenu/components/Menu/components/Screens/Conversations/components/ClearConversations.tsx =====
+import { IconCheck, IconTrash, IconX } from '@tabler/icons-react';
+import { FC, useState } from 'react';
+
+import { useTranslation } from 'next-i18next';
+
+import { SidebarButton } from '@/components/Common/Sidebar/SidebarButton';
+
+interface Props {
+  onClearConversations: () => void;
+}
+
+export const ClearConversations: FC<Props> = ({ onClearConversations }) => {
+  const [isConfirming, setIsConfirming] = useState<boolean>(false);
+
+  const { t } = useTranslation('sidebar');
+
+  const handleClearConversations = () => {
+    onClearConversations();
+    setIsConfirming(false);
+  };
+
+  return isConfirming ? (
+    <div className="flex w-full cursor-pointer items-center rounded-lg py-3 px-3 hover:bg-gray-500/10">
+      <IconTrash size={18} />
+
+      <div className="ml-3 flex-1 text-left text-[12.5px] leading-3 text-black dark:text-white">
+        {t('Are you sure?')}
+      </div>
+
+      <div className="flex w-[40px]">
+        <IconCheck
+          className="ml-auto mr-1 min-w-[20px] text-neutral-400 hover:text-neutral-100"
+          size={18}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleClearConversations();
+          }}
+        />
+
+        <IconX
+          className="ml-auto min-w-[20px] text-neutral-400 hover:text-neutral-100"
+          size={18}
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsConfirming(false);
+          }}
+        />
+      </div>
+    </div>
+  ) : (
+    <SidebarButton
+      text={t('Clear conversations')}
+      icon={<IconTrash size={18} />}
+      onClick={() => setIsConfirming(true)}
+    />
+  );
+};
+===== /Users/hhe/Desktop/P/unSaged/unSAGED/components/Home/components/PrimaryMenu/components/Menu/components/Screens/Conversations/components/ConversationList.tsx =====
+import { Conversation } from '@/types/chat';
+
+import { ConversationComponent } from './ConversationComponent';
+
+interface Props {
+  conversations: Conversation[];
+}
+
+export const ConversationList = ({ conversations }: Props) => {
+  return (
+    <div className="flex w-full flex-col gap-1">
+      {conversations
+        .filter((conversation) => !conversation.folderId)
+        .slice()
+        .reverse()
+        .map((conversation, index) => (
+          <ConversationComponent key={index} conversation={conversation} />
+        ))}
+    </div>
+  );
+};
+===== /Users/hhe/Desktop/P/unSaged/unSAGED/components/Home/components/PrimaryMenu/components/Menu/components/Screens/Conversations/components/Folders.tsx =====
+import { useContext } from 'react';
+
+import { FolderInterface } from '@/types/folder';
+
+import Folder from '@/components/Common/Folder';
+import HomeContext from '@/components/Home/home.context';
+
+import { ConversationComponent } from './ConversationComponent';
+
+interface Props {
+  searchTerm: string;
+}
+
+export const ConversationsFolders = ({ searchTerm }: Props) => {
+  const {
+    state: { folders, conversations },
+    handleUpdateConversation,
+  } = useContext(HomeContext);
+
+  const handleDrop = (e: any, folder: FolderInterface) => {
+    if (e.dataTransfer) {
+      const conversation = JSON.parse(e.dataTransfer.getData('conversation'));
+      handleUpdateConversation(conversation, {
+        key: 'folderId',
+        value: folder.id,
+      });
+    }
+  };
+
+  const Folders = (currentFolder: FolderInterface) => {
+    return (
+      conversations &&
+      conversations
+        .filter((conversation) => conversation.folderId)
+        .map((conversation, index) => {
+          if (conversation.folderId === currentFolder.id) {
+            return (
+              <div
+                key={index}
+                className="ml-5 gap-2 border-l border-theme-button-border-light dark:border-theme-button-border-dark pl-2"
+              >
+                <ConversationComponent conversation={conversation} />
+              </div>
+            );
+          }
+        })
+    );
+  };
+
+  return (
+    <div className="flex w-full flex-col pt-2">
+      {folders
+        .filter((folder) => folder.type === 'chat')
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map((folder, index) => (
+          <Folder
+            key={index}
+            searchTerm={searchTerm}
+            currentFolder={folder}
+            handleDrop={handleDrop}
+            folderComponent={Folders(folder)}
+          />
+        ))}
+    </div>
+  );
+};
+===== /Users/hhe/Desktop/P/unSaged/unSAGED/components/Home/components/PrimaryMenu/components/Menu/components/Screens/Conversations/components/ConversationComponent.tsx =====
+import {
+  IconCheck,
+  IconMessage,
+  IconPencil,
+  IconTrash,
+  IconX,
+} from '@tabler/icons-react';
+import {
+  DragEvent,
+  KeyboardEvent,
+  MouseEventHandler,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
+
+import { Conversation } from '@/types/chat';
+
+import SidebarActionButton from '@/components/Common/Buttons/SidebarActionButton';
+import HomeContext from '@/components/Home/home.context';
+
+import ConversationsContext from '../Conversations.context';
+
+interface Props {
+  conversation: Conversation;
+}
+
+export const ConversationComponent = ({ conversation }: Props) => {
+  const {
+    state: { selectedConversation, messageIsStreaming },
+    handleSelectConversation,
+    handleUpdateConversation,
+  } = useContext(HomeContext);
+
+  const { handleDeleteConversation } = useContext(ConversationsContext);
+
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [renameValue, setRenameValue] = useState('');
+
+  const handleEnterDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      selectedConversation && handleRename(selectedConversation);
+    }
+  };
+
+  const handleDragStart = (
+    e: DragEvent<HTMLButtonElement>,
+    conversation: Conversation,
+  ) => {
+    if (e.dataTransfer) {
+      e.dataTransfer.setData('conversation', JSON.stringify(conversation));
+    }
+  };
+
+  const handleRename = (conversation: Conversation) => {
+    if (renameValue.trim().length > 0) {
+      handleUpdateConversation(conversation, {
+        key: 'name',
+        value: renameValue,
+      });
+      setRenameValue('');
+      setIsRenaming(false);
+    }
+  };
+
+  const handleConfirm: MouseEventHandler<HTMLButtonElement> = (e) => {
+    e.stopPropagation();
+    if (isDeleting) {
+      handleDeleteConversation(conversation);
+    } else if (isRenaming) {
+      handleRename(conversation);
+    }
+    setIsDeleting(false);
+    setIsRenaming(false);
+  };
+
+  const handleCancel: MouseEventHandler<HTMLButtonElement> = (e) => {
+    e.stopPropagation();
+    setIsDeleting(false);
+    setIsRenaming(false);
+  };
+
+  const handleOpenRenameModal: MouseEventHandler<HTMLButtonElement> = (e) => {
+    e.stopPropagation();
+    setIsRenaming(true);
+    selectedConversation && setRenameValue(selectedConversation.name);
+  };
+  const handleOpenDeleteModal: MouseEventHandler<HTMLButtonElement> = (e) => {
+    e.stopPropagation();
+    setIsDeleting(true);
+  };
+
+  useEffect(() => {
+    if (isRenaming) {
+      setIsDeleting(false);
+    } else if (isDeleting) {
+      setIsRenaming(false);
+    }
+  }, [isRenaming, isDeleting]);
+
+  return (
+    <div className="relative flex items-center">
+      {isRenaming && selectedConversation?.id === conversation.id ? (
+        <div
+          className="flex w-full items-center gap-3 rounded-lg text-black dark:text-white
+        bg-theme-light dark:bg-theme-dark/90 p-3"
+        >
+          <IconMessage size={18} />
+          <input
+            className="mr-12 flex-1 overflow-hidden overflow-ellipsis border-theme-border-light
+            dark:border-theme-border-dark bg-transparent text-left text-[12.5px] leading-3 text-black
+            dark:text-white outline-none focus:border-neutral-100"
+            type="text"
+            value={renameValue}
+            onChange={(e) => setRenameValue(e.target.value)}
+            onKeyDown={handleEnterDown}
+            autoFocus
+          />
+        </div>
+      ) : (
+        <button
+          className={`flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-sm transition-colors
+          duration-200 text-black dark:text-white ${
+            messageIsStreaming ? 'disabled:cursor-not-allowed' : ''
+          }
+         ${
+           !(selectedConversation?.id === conversation.id)
+             ? 'hover:bg-theme-hover-light dark:hover:bg-theme-hover-dark'
+             : 'bg-theme-selected-light dark:bg-theme-selected-dark'
+         }
+          `}
+          onClick={() => handleSelectConversation(conversation)}
+          disabled={messageIsStreaming}
+          draggable="true"
+          onDragStart={(e) => handleDragStart(e, conversation)}
+        >
+          <IconMessage size={18} />
+          <div
+            className={`relative max-h-5 flex-1 overflow-hidden text-ellipsis whitespace-nowrap break-all text-left text-[12.5px] leading-3 ${
+              selectedConversation?.id === conversation.id ? 'pr-12' : 'pr-1'
+            }`}
+          >
+            {conversation.name}
+          </div>
+        </button>
+      )}
+
+      {(isDeleting || isRenaming) &&
+        selectedConversation?.id === conversation.id && (
+          <div className="absolute right-1 z-10 flex">
+            <SidebarActionButton handleClick={handleConfirm}>
+              <IconCheck size={18} />
+            </SidebarActionButton>
+            <SidebarActionButton handleClick={handleCancel}>
+              <IconX size={18} />
+            </SidebarActionButton>
+          </div>
+        )}
+
+      {selectedConversation?.id === conversation.id &&
+        !isDeleting &&
+        !isRenaming && (
+          <div className="absolute right-1 z-10 flex">
+            <SidebarActionButton handleClick={handleOpenRenameModal}>
+              <IconPencil size={18} />
+            </SidebarActionButton>
+            <SidebarActionButton handleClick={handleOpenDeleteModal}>
+              <IconTrash size={18} />
+            </SidebarActionButton>
+          </div>
+        )}
+    </div>
+  );
+};
+===== /Users/hhe/Desktop/P/unSaged/unSAGED/components/Home/components/PrimaryMenu/components/Menu/components/Screens/Conversations/components/ConversationsSettings.tsx =====
+import { IconFileExport, IconLogout, IconSettings } from '@tabler/icons-react';
+import { useContext } from 'react';
+
+import { useTranslation } from 'next-i18next';
+
+import { SidebarButton } from '@/components/Common/Sidebar/SidebarButton';
+import { Import } from '@/components/Home/components/Settings/Import';
+import HomeContext from '@/components/Home/home.context';
+
+import ConversationsContext from '../Conversations.context';
+import { ClearConversations } from './ClearConversations';
+
+export const ConversationsSettings = () => {
+  const { t } = useTranslation('sidebar');
+
+  const {
+    state: { database, conversations },
+  } = useContext(HomeContext);
+
+  const {
+    handleClearConversations,
+    handleImportConversations,
+    handleExportData,
+  } = useContext(ConversationsContext);
+
+  return (
+    <div
+      className="flex flex-col items-center space-y-1 border-t
+    border-theme-border-light dark:border-theme-border-dark pt-1 text-sm"
+    >
+      {conversations.length > 0 ? (
+        <ClearConversations onClearConversations={handleClearConversations} />
+      ) : null}
+
+      <Import onImport={handleImportConversations} />
+
+      {/* <SidebarButton
+        text={t('Export data')}
+        icon={<IconFileExport size={18} />}
+        onClick={() => handleExportData(database!)}
+      /> */}
+    </div>
+  );
+};
